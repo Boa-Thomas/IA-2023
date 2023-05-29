@@ -88,11 +88,11 @@ env = UFSCEvironment()
 env.render()
 
 # Define the search space for alpha, gamma, and epsilon
-alphas = np.linspace(0.1, 1.0, 5)
-gammas = np.linspace(0.1, 1.0, 5)
-epsilons = np.linspace(0.1, 1.0, 5)
+alphas = np.linspace(0.1, 1.0, 10)
+gammas = np.linspace(0.1, 1.0, 10)
+epsilons = np.linspace(0.1, 1.0, 10)
 
-num_episodes = 1000
+num_episodes = 10000
 
 # Prepare a dictionary to store the total rewards for each parameter combination
 results = {}
