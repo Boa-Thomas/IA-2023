@@ -88,9 +88,9 @@ env = UFSCEvironment()
 env.render()
 
 # Define the search space for alpha, gamma, and epsilon
-alphas = np.linspace(0.1, 1.0, 3)
-gammas = np.linspace(0.1, 1.0, 3)
-epsilons = np.linspace(0.1, 1.0, 3)
+alphas = np.linspace(0.1, 1.0, 5)
+gammas = np.linspace(0.1, 1.0, 5)
+epsilons = np.linspace(0.1, 1.0, 5)
 
 num_episodes = 1000
 
@@ -136,7 +136,7 @@ for alpha in alphas:
             results[(alpha, gamma, epsilon)] = total_rewards
 
 # Find the best parameters
-best_params = max(results, key=lambda x: sum(results[x])/num_episodes)
+best_params = max(results, key=lambda x: sum(results[x][-50:])/50)
 
 print(f"Best parameters are alpha: {best_params[0]}, gamma: {best_params[1]}, epsilon: {best_params[2]}")
 
