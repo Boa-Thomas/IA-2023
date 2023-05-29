@@ -54,7 +54,7 @@ class UFSCEvironment(gym.Env):
         self.current_state = x + y
 
         # Calculate reward
-        if self.grid[x][y] == 'Aula de IA':
+        if self.grid[x][y] == 'End':
             reward = 50
             done = True
         elif self.grid[x][y] == 'Start':
@@ -88,14 +88,16 @@ env = UFSCEvironment()
 env.render()
 
 # Define the search space for alpha, gamma, and epsilon
-alphas = np.linspace(0.1, 1.0, 10)
-gammas = np.linspace(0.1, 1.0, 10)
-epsilons = np.linspace(0.1, 1.0, 10)
+alphas = np.linspace(0.1, 1.0, 3)
+gammas = np.linspace(0.1, 1.0, 3)
+epsilons = np.linspace(0.1, 1.0, 3)
 
-num_episodes = 10000
+num_episodes = 1000
 
 # Prepare a dictionary to store the total rewards for each parameter combination
 results = {}
+
+
 
 for alpha in alphas:
     for gamma in gammas:
