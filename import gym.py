@@ -17,7 +17,7 @@ class UFSCEvironment(gym.Env):
         # Define the initial state
         self.current_state = 0
 
-        # Define the initial step
+        # define the initial step
         self.current_step = 0
 
         # Define the maximum number of steps
@@ -25,6 +25,12 @@ class UFSCEvironment(gym.Env):
 
         # Import the grid from a csv file
         self.grid = pd.read_csv('board.csv').values.tolist()
+
+        # Get the dimensions of your grid
+        self.n = len(self.grid)
+
+        # Define a 2D observation space
+        self.observation_space = spaces.Discrete(self.n * self.n)
 
     def step(self, action):
         # Check if max steps reached
@@ -41,9 +47,9 @@ class UFSCEvironment(gym.Env):
         if action == 0:  # up
             x = max(x - 1, 0)
         elif action == 1:  # right
-            y = min(y + 1, 9)
+            y = min(y + 1, self.n - 1)
         elif action == 2:  # down
-            x = min(x + 1, 9)
+            x = min(x + 1, self.n - 1)
         elif action == 3:  # left
             y = max(y - 1, 0)
 
@@ -51,7 +57,7 @@ class UFSCEvironment(gym.Env):
         if self.grid[x][y] == -50:
             x, y = old_x, old_y
 
-        self.current_state = x + y
+        self.current_state = x * (self.n-1) + y  # Update current_state using 2D to 1D conversion
 
         # Calculate reward
         if self.grid[x][y] == 'End':
@@ -69,14 +75,12 @@ class UFSCEvironment(gym.Env):
 
         return self.current_state, reward, done, {}
 
-
     def reset(self):
         # Reset the state to the starting point and current step
         self.current_state = 0
         self.current_step = 0
         return self.current_state
 
-    
     def render(self):
         for row in self.grid:
             print(' | '.join(map(str, row)))
@@ -87,64 +91,53 @@ class UFSCEvironment(gym.Env):
 env = UFSCEvironment()
 env.render()
 
-# Define the search space for alpha, gamma, and epsilon
-alphas = np.linspace(0.1, 1.0, 3)
-gammas = np.linspace(0.1, 1.0, 3)
-epsilons = np.linspace(0.1, 1.0, 3)
-
+# Parameters
+alpha = 0.55
+gamma = 0.2
+epsilon = 0.2
 num_episodes = 1000
 
-# Prepare a dictionary to store the total rewards for each parameter combination
-results = {}
+# Initialize Q-table to be uniform (all zeros)
+Q_table = np.zeros([env.observation_space.n, env.action_space.n])
 
+# Initialize list to contain total rewards per episode
+total_rewards = []
 
+for i_episode in range(num_episodes):
+    # Reset state
+    state = env.reset()
+    total_reward = 0  # Reset the total reward per episode
 
-for alpha in alphas:
-    for gamma in gammas:
-        for epsilon in epsilons:
-            Q_table = np.zeros([env.observation_space.n, env.action_space.n])
-            total_rewards = []
+    for t in range(500):
+        # Choose action. Either explore randomly, or exploit knowledge from Q-table
+        if np.random.uniform(0, 1) < epsilon:
+            action = env.action_space.sample()
+        else:
+            action = np.argmax(Q_table[state]) 
 
-            for i_episode in range(num_episodes):
-                # Reset state
-                state = env.reset()
-                total_reward = 0  # Reset the total reward per episode
+        next_state, reward, done, info = env.step(action) 
 
-                for t in range(500):
-                    # Choose action. Either explore randomly, or exploit knowledge from Q-table
-                    if np.random.uniform(0, 1) < epsilon:
-                        action = env.action_space.sample()
-                    else:
-                        action = np.argmax(Q_table[state]) 
+        old_value = Q_table[state, action]
+        next_max = np.max(Q_table[next_state])
 
-                    next_state, reward, done, info = env.step(action) 
+        # Update Q-value for the current state-action pair
+        new_value = (1 - alpha) * old_value + alpha * (reward + gamma * next_max)
+        Q_table[state, action] = new_value
 
-                    old_value = Q_table[state, action]
-                    next_max = np.max(Q_table[next_state])
+        state = next_state
+        total_reward += reward  # Add reward to total reward
 
-                    # Update Q-value for the current state-action pair
-                    new_value = (1 - alpha) * old_value + alpha * (reward + gamma * next_max)
-                    Q_table[state, action] = new_value
+        if done:
+            break
 
-                    state = next_state
-                    total_reward += reward  # Add reward to total reward
+    total_rewards.append(total_reward)  # Append total reward of the episode to the total_rewards list
 
-                    if done:
-                        break
+# Print out the resulting Q-table
+print(Q_table)
 
-                total_rewards.append(total_reward)  # Append total reward of the episode to the total_rewards list
-
-            # Store the total rewards for this parameter combination
-            results[(alpha, gamma, epsilon)] = total_rewards
-
-# Find the best parameters
-best_params = max(results, key=lambda x: sum(results[x][-50:])/50)
-
-print(f"Best parameters are alpha: {best_params[0]}, gamma: {best_params[1]}, epsilon: {best_params[2]}")
-
-# Plot total rewards per episode for the best parameters
-plt.plot(results[best_params])
-plt.title(f'Total rewards per episode in Q-learning with alpha={best_params[0]}, gamma={best_params[1]}, epsilon={best_params[2]}')
+# Plot total rewards per episode
+plt.plot(total_rewards)
+plt.title('Total rewards per episode in Q-learning')
 plt.xlabel('Episode')
 plt.ylabel('Total reward')
 plt.show()
