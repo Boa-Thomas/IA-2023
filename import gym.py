@@ -94,10 +94,10 @@ env.render()
 import numpy as np
 
 # Parameters
-alpha_values = np.arange(0, 2, 0.001)
-gamma_values = np.arange(0, 2, 0.001)
-epsilon_values = np.arange(0, 2, 0.001)
-num_episodes = 1500
+alpha_values = np.arange(0, 1, 0.1) #0.4
+gamma_values = np.arange(0, 0.8, 0.1) #0.2
+epsilon_values = np.arange(0, 0.1, 0.1) #0.0
+num_episodes = 1000
 
 best_avg_reward = -np.inf
 best_params = None
@@ -132,9 +132,11 @@ for alpha in alpha_values:
                 total_rewards.append(total_reward)
 
             avg_reward = np.mean(total_rewards[-50:]) # average of last 50 rewards
+            print(f'Average reward: {avg_reward} with parameters: {alpha, gamma, epsilon}')
             if avg_reward > best_avg_reward:
                 best_avg_reward = avg_reward
                 best_params = {'alpha': alpha, 'gamma': gamma, 'epsilon': epsilon}
+                print(f'Best average reward: {best_avg_reward} with parameters: {best_params}')
 
 print(f'Best average reward: {best_avg_reward} with parameters: {best_params}')
 
