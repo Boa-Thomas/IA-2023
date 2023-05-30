@@ -91,9 +91,9 @@ env.render()
 import numpy as np
 
 # Parameters
-alpha_values = np.arange(0, 1, 0.1)
-gamma_values = np.arange(0, 1, 0.1)
-epsilon_values = np.arange(0, 1, 0.1)
+alpha_values = np.arange(0, 2, 0.001)
+gamma_values = np.arange(0, 2, 0.001)
+epsilon_values = np.arange(0, 2, 0.001)
 num_episodes = 1500
 
 best_avg_reward = -np.inf
@@ -133,6 +133,7 @@ for alpha in alpha_values:
             if avg_reward > best_avg_reward:
                 best_avg_reward = avg_reward
                 best_params = {'alpha': alpha, 'gamma': gamma, 'epsilon': epsilon}
+                print(f'Best average reward: {best_avg_reward} with parameters: {best_params}')
 
 print(f'Best average reward: {best_avg_reward} with parameters: {best_params}')
 
