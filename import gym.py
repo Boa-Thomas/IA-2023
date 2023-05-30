@@ -92,10 +92,10 @@ env = UFSCEvironment()
 env.render()
 
 # Parameters
-alpha = 0.55
-gamma = 0.2
-epsilon = 0.2
-num_episodes = 1000
+alpha = 0.005
+gamma = 0.1
+epsilon = 0.05
+num_episodes = 2000
 
 # Initialize Q-table to be uniform (all zeros)
 Q_table = np.zeros([env.observation_space.n, env.action_space.n])
