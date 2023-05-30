@@ -9,7 +9,7 @@ class UFSCEvironment(gym.Env):
         super(UFSCEvironment, self).__init__()
 
         # Define a 2D observation space
-        self.observation_space = spaces.Discrete(10*10)
+        self.observation_space = spaces.Discrete(9*9)
 
         # Define an action space ranging from 0 to 3: up, right, down, left
         self.action_space = spaces.Discrete(4)
@@ -25,12 +25,15 @@ class UFSCEvironment(gym.Env):
 
         # Import the grid from a csv file
         self.grid = pd.read_csv('board.csv').values.tolist()
+        print(self.grid)
 
         # Get the dimensions of your grid
         self.n = len(self.grid)
+        print(self.n)
 
         # Define a 2D observation space
         self.observation_space = spaces.Discrete(self.n * self.n)
+        print(self.observation_space)
 
     def step(self, action):
         # Check if max steps reached
@@ -60,13 +63,7 @@ class UFSCEvironment(gym.Env):
         self.current_state = x * (self.n-1) + y  # Update current_state using 2D to 1D conversion
 
         # Calculate reward
-        if self.grid[x][y] == 'End':
-            reward = 50
-            done = True
-        elif self.grid[x][y] == 'Start':
-            reward = -1
-            done = False
-        elif type(self.grid[x][y]) is int:
+        if type(self.grid[x][y]) is int:
             reward = self.grid[x][y]
             done = False
         else:
@@ -94,9 +91,9 @@ env.render()
 import numpy as np
 
 # Parameters
-alpha_values = np.arange(0, 2, 0.001)
-gamma_values = np.arange(0, 2, 0.001)
-epsilon_values = np.arange(0, 2, 0.001)
+alpha_values = np.arange(0, 1, 0.1)
+gamma_values = np.arange(0, 1, 0.1)
+epsilon_values = np.arange(0, 1, 0.1)
 num_episodes = 1500
 
 best_avg_reward = -np.inf
@@ -132,6 +129,7 @@ for alpha in alpha_values:
                 total_rewards.append(total_reward)
 
             avg_reward = np.mean(total_rewards[-50:]) # average of last 50 rewards
+            print(f'Average reward: {avg_reward} with parameters: {alpha, gamma, epsilon}')
             if avg_reward > best_avg_reward:
                 best_avg_reward = avg_reward
                 best_params = {'alpha': alpha, 'gamma': gamma, 'epsilon': epsilon}
