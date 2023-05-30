@@ -91,53 +91,51 @@ class UFSCEvironment(gym.Env):
 env = UFSCEvironment()
 env.render()
 
+import numpy as np
+
 # Parameters
-alpha = 0.005
-gamma = 0.1
-epsilon = 0.05
-num_episodes = 2000
+alpha_values = np.arange(0, 2, 0.001)
+gamma_values = np.arange(0, 2, 0.001)
+epsilon_values = np.arange(0, 2, 0.001)
+num_episodes = 1500
 
-# Initialize Q-table to be uniform (all zeros)
-Q_table = np.zeros([env.observation_space.n, env.action_space.n])
+best_avg_reward = -np.inf
+best_params = None
 
-# Initialize list to contain total rewards per episode
-total_rewards = []
+for alpha in alpha_values:
+    for gamma in gamma_values:
+        for epsilon in epsilon_values:
+            Q_table = np.zeros([env.observation_space.n, env.action_space.n])
+            total_rewards = []
 
-for i_episode in range(num_episodes):
-    # Reset state
-    state = env.reset()
-    total_reward = 0  # Reset the total reward per episode
+            for i_episode in range(num_episodes):
+                state = env.reset()
+                total_reward = 0
 
-    for t in range(500):
-        # Choose action. Either explore randomly, or exploit knowledge from Q-table
-        if np.random.uniform(0, 1) < epsilon:
-            action = env.action_space.sample()
-        else:
-            action = np.argmax(Q_table[state]) 
+                for t in range(500):
+                    if np.random.uniform(0, 1) < epsilon:
+                        action = env.action_space.sample()
+                    else:
+                        action = np.argmax(Q_table[state])
 
-        next_state, reward, done, info = env.step(action) 
+                    next_state, reward, done, info = env.step(action)
+                    old_value = Q_table[state, action]
+                    next_max = np.max(Q_table[next_state])
+                    new_value = (1 - alpha) * old_value + alpha * (reward + gamma * next_max)
+                    Q_table[state, action] = new_value
+                    state = next_state
+                    total_reward += reward
 
-        old_value = Q_table[state, action]
-        next_max = np.max(Q_table[next_state])
+                    if done:
+                        break
 
-        # Update Q-value for the current state-action pair
-        new_value = (1 - alpha) * old_value + alpha * (reward + gamma * next_max)
-        Q_table[state, action] = new_value
+                total_rewards.append(total_reward)
 
-        state = next_state
-        total_reward += reward  # Add reward to total reward
+            avg_reward = np.mean(total_rewards[-50:]) # average of last 50 rewards
+            if avg_reward > best_avg_reward:
+                best_avg_reward = avg_reward
+                best_params = {'alpha': alpha, 'gamma': gamma, 'epsilon': epsilon}
 
-        if done:
-            break
+print(f'Best average reward: {best_avg_reward} with parameters: {best_params}')
 
-    total_rewards.append(total_reward)  # Append total reward of the episode to the total_rewards list
-
-# Print out the resulting Q-table
-print(Q_table)
-
-# Plot total rewards per episode
-plt.plot(total_rewards)
-plt.title('Total rewards per episode in Q-learning')
-plt.xlabel('Episode')
-plt.ylabel('Total reward')
-plt.show()
+# Now you can run the model again with the best parameters
