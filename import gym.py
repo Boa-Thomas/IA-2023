@@ -9,7 +9,7 @@ class UFSCEvironment(gym.Env):
         super(UFSCEvironment, self).__init__()
 
         # Define a 2D observation space
-        self.observation_space = spaces.Discrete(9*9)
+        self.observation_space = spaces.Discrete(10*10)
 
         # Define an action space ranging from 0 to 3: up, right, down, left
         self.action_space = spaces.Discrete(4)
