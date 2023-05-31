@@ -25,15 +25,12 @@ class UFSCEvironment(gym.Env):
 
         # Import the grid from a csv file
         self.grid = pd.read_csv('board.csv').values.tolist()
-        #print(self.grid)
 
         # Get the dimensions of your grid
         self.n = len(self.grid)
-        #print(self.n)
 
         # Define a 2D observation space
         self.observation_space = spaces.Discrete(self.n * self.n)
-        print(self.observation_space)
 
     def step(self, action):
         # Check if max steps reached
@@ -94,10 +91,12 @@ env = UFSCEvironment()
 env.render()
 
 # Parameters
-alpha = 0.6
-gamma = 0.3
-epsilon = 0.3
-num_episodes = 10000
+initial_alpha = 0.6
+alpha_decay = 0.01
+gamma = 0.9
+initial_epsilon = 0.7
+epsilon_decay = 0.01
+num_episodes = 1000
 
 Q_table = np.zeros([env.observation_space.n, env.action_space.n])
 total_rewards = []
@@ -105,6 +104,9 @@ total_rewards = []
 for i_episode in range(num_episodes):
     state = env.reset()
     total_reward = 0
+
+    alpha = initial_alpha * np.exp(-alpha_decay * i_episode) 
+    epsilon = initial_epsilon * np.exp(-epsilon_decay * i_episode) 
 
     for t in range(500):
         if np.random.uniform(0, 1) < epsilon:
@@ -121,7 +123,6 @@ for i_episode in range(num_episodes):
         total_reward += reward
 
         if done:
-            print(Q_table)
             break
 
     total_rewards.append(total_reward)
@@ -155,3 +156,4 @@ for i in range(env.n):
 # Print the grid
 for row in best_actions_grid:
     print(' '.join(row))
+print(total_reward)
