@@ -66,6 +66,9 @@ class UFSCEvironment(gym.Env):
         if type(self.grid[x][y]) is int:
             reward = self.grid[x][y]
             done = False
+        elif self.grid[x][y] == 'End':
+            reward = 50
+            done = True
         else:
             reward = -10
             done = False
