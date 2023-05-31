@@ -60,7 +60,7 @@ class UFSCEvironment(gym.Env):
         if self.grid[x][y] == -50:
             x, y = old_x, old_y
 
-        self.current_state = x * (self.n-1) + y  # Update current_state using 2D to 1D conversion
+        self.current_state = x * (self.n) + y  # Update current_state using 2D to 1D conversion
 
         # Calculate reward
         if type(self.grid[x][y]) is int:
@@ -91,17 +91,17 @@ env.render()
 import numpy as np
 
 # Parameters
-alpha_values = np.arange(0, 2, 0.001)
-gamma_values = np.arange(0, 2, 0.001)
-epsilon_values = np.arange(0, 2, 0.001)
-num_episodes = 1500
+alpha_values = np.arange(0, 2, 0.1)
+gamma_values = np.arange(0, 1, 0.1)
+epsilon_values = np.arange(0, 1, 0.1)
+num_episodes = 1000
 
 best_avg_reward = -np.inf
 best_params = None
 
-for alpha in alpha_values:
+for epsilon in epsilon_values:
     for gamma in gamma_values:
-        for epsilon in epsilon_values:
+        for alpha in alpha_values:
             Q_table = np.zeros([env.observation_space.n, env.action_space.n])
             total_rewards = []
 
